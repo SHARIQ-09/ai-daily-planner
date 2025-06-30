@@ -13,8 +13,10 @@ function PlanForm() {
 
     try {
       const result = await generatePlan(userInput);
+      console.log("Generated plan:", result); 
       setPlan(result);
     } catch (error) {
+      console.error("❌ Error in frontend:", error); 
       setPlan("Something went wrong.");
     } finally {
       setLoading(false);
@@ -93,6 +95,7 @@ function PlanForm() {
       {/* Render Plan */}
       {plan && (
         <div className="mt-8">
+           <pre className="text-sm bg-gray-100 p-4 border rounded">{plan}</pre>
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">📝 Your Plan for Today</h2>
           <ul className="space-y-4">{plan.split("\n").map(renderLine)}</ul>
         </div>

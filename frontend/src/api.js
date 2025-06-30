@@ -12,6 +12,7 @@ export async function generatePlan(user_input) {
   }
 
   const data = await response.json();
+  console.log("Backend response:", data);
   return data.plan;
 }
 
