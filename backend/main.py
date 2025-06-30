@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI , Request
 from fastapi.middleware.cors import CORSMiddleware
 from planner import generate_schedule
 from models import PlanRequest, PlanResponse
@@ -12,6 +12,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/generate-plan", response_model=PlanResponse)
-def plan_day(request: PlanRequest):
-    return generate_schedule(request)
+@app.post("/generate")
+async def generate(request: Request):
+    try:
+        data = await request.json()
+        print("Received input:", data)
+        input_text = data.get("input", "")
+        plan = generate_schedule(input_text)
+        return {"plan": plan}
+    except Exception as e:
+        print ("❌ Error:", e)
+        return {"error": str(e)}
+
