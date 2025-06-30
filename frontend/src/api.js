@@ -12,6 +12,6 @@ export async function generatePlan(user_input) {
   }
 
   const data = await response.json();
-  return data.plan_text;
+  return data.plan;
 }
 

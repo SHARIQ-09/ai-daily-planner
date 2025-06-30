@@ -17,7 +17,7 @@ async def generate(request: Request):
     try:
         data = await request.json()
         print("Received input:", data)
-        input_text = data.get("input", "")
+        input_text = data.get("user_input", "")
         plan = generate_schedule(input_text)
         return {"plan": plan}
     except Exception as e:

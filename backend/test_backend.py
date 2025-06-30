@@ -3,7 +3,7 @@ import requests
 
 try:
     response = requests.post(
-        "http://localhost:8000/generate",
+        "https://ai-daily-planner.onrender.com/generate",
         json={"user_input": "I want to go for a walk and do deep work."},
         timeout=10  # to prevent hanging
     )
