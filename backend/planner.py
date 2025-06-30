@@ -4,29 +4,46 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-API_URL = f"https://api-inference.huggingface.co/models/HuggingFaceH4/{os.getenv('MODEL_ID')}"
-HEADERS = {"Authorization": f"Bearer {os.getenv('HUGGINGFACE_API_KEY')}"}
+
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+MODEL_NAME = os.getenv("MODEL_NAME", "llama3-8b-8192")
+
 
 def generate_schedule(user_input):
     prompt = f"""
     You are a productivity assistant. The user said: "{user_input}".
-    Create a realistic, time-blocked plan for a productive day from 9 AM to 9 PM.
-    Include work blocks, short breaks, and make it easy to follow.
+    Create a realistic, time-blocked plan for a productive day from user given time.
+    if the user does not give time , plan their day from 7a.m to 10 p.m.
+    Use markdown formatting:
+    - Use hyphens (-) to start each subtask 
+    - Include clear time blocks and make the plan easy to follow
+    - DO not use any extra emojis or symbols
     """
-    payload = {"inputs": prompt}
-    print("Using model URL:", API_URL)
-    print("Using token prefix:", HEADERS["Authorization"][:10])  # just to check it's loading
+    
+    url ="https://api.groq.com/openai/v1/chat/completions"
 
-    response = requests.post(API_URL, headers=HEADERS, json=payload)
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    print("Loaded API Key:", headers["Authorization"][:10])  # Should print 'Bearer ...'
 
+    payload = {
+        "model": MODEL_NAME,
+        "messages": [
+            {"role": "system", "content": "You are a helpful productivity assistant."},
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.7
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
     if response.status_code == 200:
-        result = response.json()
-        # Some models return a list, some return a dict
-        if isinstance(result, list) and "generated_text" in result[0]:
-            return result[0]["generated_text"]
-        elif isinstance(result, dict) and "generated_text" in result:
-            return result["generated_text"]
-        else:
-            return str(result)
+        return response.json()["choices"][0]["message"]["content"].strip()
     else:
-        return f"Error contacting Hugging Face API: {response.status_code} - {response.text}"
+        print("❌ Error:", response.status_code, response.text)
+        return f"Error contacting Groq API: {response.status_code}"
+
+
+
+
