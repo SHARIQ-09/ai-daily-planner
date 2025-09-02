@@ -6,7 +6,7 @@ load_dotenv()
 
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-MODEL_NAME = os.getenv("MODEL_NAME", "llama3-8b-8192")
+MODEL_NAME = os.getenv("MODEL_NAME", "llama-3.3-70b-versatile")
 
 
 def generate_schedule(user_input):
