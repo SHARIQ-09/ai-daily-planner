@@ -1,5 +1,5 @@
 export async function generatePlan(user_input) {
-  const response = await fetch("https://ai-daily-planner.onrender.com/generateh", {
+  const response = await fetch("https://ai-daily-planner.onrender.com/generate", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
