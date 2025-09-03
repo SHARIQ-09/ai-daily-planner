@@ -24,7 +24,6 @@ function PlanForm() {
     }
   };
 
-  // Parse plan based on ### headers and - tasks
   const parsePlan = (text) => {
     const lines = text.trim().split("\n");
     const blocks = [];
@@ -34,14 +33,20 @@ function PlanForm() {
       line = line.trim();
       if (!line) continue;
 
-      if (line.startsWith("### ")) {
+      const blockHeader = line.match(/^\*\*(.+?)\*\*$/);
+      if (blockHeader) {
         if (current) blocks.push(current);
+        const header = blockHeader[1];
+        const [timePart, ...titleParts] = header.split(":");
         current = {
-          title: line.replace("### ", "").trim(),
+          time: timePart.trim(),
+          title: titleParts.join(":").trim(),
           tasks: [],
         };
-      } else if (line.startsWith("- ")) {
-        current?.tasks.push(line.replace("- ", "").trim());
+      } else if (/^[\-*+]\s+/.test(line)) {
+        current?.tasks.push(line.replace(/^[\-*+]\s+/, ""));
+      } else {
+        current?.tasks.push(line);
       }
     }
 
@@ -61,16 +66,22 @@ function PlanForm() {
     const today = new Date();
 
     for (const block of planBlocks) {
-      const startTimeMatch = block.tasks[0]?.match(/(\d{1,2}:\d{2})\s?(a\.m\.|p\.m\.)/i);
-      const endTimeMatch = block.tasks[block.tasks.length - 1]?.match(/(\d{1,2}:\d{2})\s?(a\.m\.|p\.m\.)/i);
+      const match = block.time.match(/(\d{1,2}:\d{2})\s?(AM|PM)\s?-\s?(\d{1,2}:\d{2})\s?(AM|PM)/i);
+      if (!match) continue;
 
-      if (!startTimeMatch || !endTimeMatch) continue;
-
-      const [sh, sm] = to24Hour(startTimeMatch[1], startTimeMatch[2]);
-      const [eh, em] = to24Hour(endTimeMatch[1], endTimeMatch[2]);
-
+      const [_, startTime, startAMPM, endTime, endAMPM] = match;
       const startDate = new Date(today);
       const endDate = new Date(today);
+
+      const to24Hour = (time, ampm) => {
+        let [hours, minutes] = time.split(":").map(Number);
+        if (ampm.toUpperCase() === "PM" && hours !== 12) hours += 12;
+        if (ampm.toUpperCase() === "AM" && hours === 12) hours = 0;
+        return [hours, minutes];
+      };
+
+      const [sh, sm] = to24Hour(startTime, startAMPM);
+      const [eh, em] = to24Hour(endTime, endAMPM);
       startDate.setHours(sh, sm);
       endDate.setHours(eh, em);
 
@@ -89,13 +100,6 @@ function PlanForm() {
     a.download = "plan.ics";
     a.click();
     URL.revokeObjectURL(url);
-  };
-
-  const to24Hour = (time, ampm) => {
-    let [hours, minutes] = time.split(":").map(Number);
-    if (ampm.toLowerCase() === "p.m." && hours !== 12) hours += 12;
-    if (ampm.toLowerCase() === "a.m." && hours === 12) hours = 0;
-    return [hours, minutes];
   };
 
   return (
@@ -141,8 +145,9 @@ function PlanForm() {
               key={i}
               className="bg-white border-l-4 border-blue-500 px-4 py-3 rounded shadow"
             >
-              <div className="text-lg mb-1 text-blue-700 font-semibold">
-                {block.title}
+              <div className="text-lg mb-1">
+                <span className="text-blue-700 font-semibold">{block.time}</span>
+                <span className="italic text-gray-700">: {block.title}</span>
               </div>
               <ul className="space-y-2 ml-2 mt-2">
                 {block.tasks.map((task, j) => {

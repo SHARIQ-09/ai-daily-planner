@@ -34,7 +34,7 @@ def generate_schedule(user_input):
             {"role": "system", "content": "You are a helpful productivity assistant."},
             {"role": "user", "content": prompt}
         ],
-        "temperature": 0.7
+        "temperature": 0.1
     }
 
     response = requests.post(url, headers=headers, json=payload)

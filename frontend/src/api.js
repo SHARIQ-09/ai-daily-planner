@@ -1,5 +1,5 @@
 export async function generatePlan(user_input) {
-  const response = await fetch("https://ai-daily-planner.onrender.com/generate", {
+  const response = await fetch("https://ai-daily-planner.onrender.com/generateh", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -18,3 +18,4 @@ export async function generatePlan(user_input) {
 
 
 //http://127.0.0.1:8000/generate
+//https://ai-daily-planner.onrender.com/generate
